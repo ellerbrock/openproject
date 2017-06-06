@@ -84,7 +84,7 @@ export class WorkPackageRelationsService {
    * Require the relations of a set of involved work packages loaded into the states.
    */
   public requireInvolved(workPackageIds:string[]) {
-    this.relationsRequest(workPackageIds).then((elements:RelationResource[]) => {
+    return this.relationsRequest(workPackageIds).then((elements:RelationResource[]) => {
       this.mergeIntoStates(elements);
     });
   }

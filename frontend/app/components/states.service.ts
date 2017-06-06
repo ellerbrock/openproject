@@ -23,6 +23,7 @@ import {WorkPackageTableHierarchies} from "./wp-fast-table/wp-table-hierarchies"
 import {WorkPackageTableTimelineState} from "./wp-fast-table/wp-table-timeline";
 import {TableRenderResult} from "./wp-fast-table/builders/modes/table-render-pass";
 import {SwitchState} from "./states/switch-state";
+import {WorkPackageTableRelationColumns} from './wp-fast-table/wp-table-relation-columns';
 
 export class States extends StatesGroup {
 
@@ -96,6 +97,9 @@ export class TableState {
   stopAllSubscriptions = new Subject();
   // Fire when table refresh is required
   refreshRequired = input<boolean>();
+
+  // Expanded relation columns
+  relationColumns = input<WorkPackageTableRelationColumns>();
 
 }
 

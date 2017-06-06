@@ -15,6 +15,7 @@ import {QueryFormResource} from '../api/api-v3/hal-resources/query-form-resource
 import {QuerySchemaResourceInterface} from '../api/api-v3/hal-resources/query-schema-resource.service';
 import {QueryFilterInstanceSchemaResource} from '../api/api-v3/hal-resources/query-filter-instance-schema-resource.service';
 import {WorkPackageCacheService} from '../work-packages/work-package-cache.service';
+import {WorkPackageTableRelationColumnsService} from '../wp-fast-table/state/wp-table-relation-columns.service';
 
 export class WorkPackageStatesInitializationService {
   constructor(protected states:States,
@@ -25,6 +26,7 @@ export class WorkPackageStatesInitializationService {
               protected wpTableSum:WorkPackageTableSumService,
               protected wpTableTimeline:WorkPackageTableTimelineService,
               protected wpTableHierarchies:WorkPackageTableHierarchiesService,
+              protected wpTableRelationColumns:WorkPackageTableRelationColumnsService,
               protected wpTablePagination:WorkPackageTablePaginationService,
               protected wpListInvalidQueryService:WorkPackagesListInvalidQueryService,
               protected wpCacheService:WorkPackageCacheService,
@@ -81,6 +83,8 @@ export class WorkPackageStatesInitializationService {
     this.states.table.groups.putValue(angular.copy(results.groups));
 
     this.wpTablePagination.initialize(results);
+
+    this.wpTableRelationColumns.initialize(results.elements, this.wpTableColumns.getColumns());
 
     this.AuthorisationService.initModelAuth('work_packages', results.$links);
   }
