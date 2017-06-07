@@ -113,7 +113,8 @@ export class TableRenderingStates {
     this.table.columns,
     this.table.sum,
     this.table.groupBy,
-    this.table.sortBy
+    this.table.sortBy,
+    this.table.relationColumns
   );
 
   onQueryUpdated = derive(this.combinedTableStates, ($, input) => $.mapTo(null));

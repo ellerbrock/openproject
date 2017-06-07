@@ -41,7 +41,9 @@ export class WorkPackagesListChecksumService {
   public updateIfDifferent(query:QueryResource,
                            pagination:WorkPackageTablePagination) {
 
+    console.log(this.checksum);
     let newQueryChecksum = this.getNewChecksum(query, pagination);
+    console.log(newQueryChecksum);
 
     if (this.isUninitialized()) {
       // Do nothing

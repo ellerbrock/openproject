@@ -44,7 +44,8 @@ export class WorkPackageStatesInitializationService {
     this.clearStates();
 
     this.initializeFromQuery(query);
-    this.initializeFromResults(results);
+
+    this.updateFromResults(results);
   }
 
   /**
@@ -67,7 +68,9 @@ export class WorkPackageStatesInitializationService {
     this.wpTableColumns.update(query, schema);
   }
 
-  private initializeFromResults(results:WorkPackageCollectionResource) {
+  public updateFromResults(results:WorkPackageCollectionResource) {
+    this.wpTableRelationColumns.clear();
+
     if (results.schemas) {
       _.each(results.schemas.elements, (schema:SchemaResource) => {
         this.states.schemas.get(schema.href as string).putValue(schema);
@@ -84,7 +87,7 @@ export class WorkPackageStatesInitializationService {
 
     this.wpTablePagination.initialize(results);
 
-    this.wpTableRelationColumns.initialize(results.elements, this.wpTableColumns.getColumns());
+    this.wpTableRelationColumns.initialize(results.elements);
 
     this.AuthorisationService.initModelAuth('work_packages', results.$links);
   }
@@ -105,11 +108,12 @@ export class WorkPackageStatesInitializationService {
     const reason = 'Clearing states before re-initialization.';
 
     // Clear table states
-    this.wpTableSum.clear(reason)
+/*    this.wpTableSum.clear(reason)
     this.wpTableColumns.clear(reason);
     this.wpTableGroupBy.clear(reason);
     this.wpTableTimeline.clear(reason);
-    this.wpTableHierarchies.clear(reason);
+    this.wpTableHierarchies.clear(reason);*/
+    this.wpTableRelationColumns.clear(reason);
 
     // Clear immediate input states
     this.states.table.rows.clear(reason);
