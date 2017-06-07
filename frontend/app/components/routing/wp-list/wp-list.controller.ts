@@ -101,7 +101,17 @@ function WorkPackagesListController($scope:any,
 
     scopedObservable($scope, states.tableRendering.onQueryUpdated.changes$())
       .subscribe((val) => {
-        $scope.tableInformationLoaded = states.tableRendering.onQueryUpdated.hasValue();
+        const hasValue = states.tableRendering.onQueryUpdated.hasValue();
+        $scope.tableInformationLoaded = hasValue;
+
+        if (hasValue) {
+
+          const query = states.table.query.value!;
+          const pagination = states.table.pagination.value!;
+
+          updateTitle(query);
+          wpListChecksumService.updateIfDifferent(query, pagination);
+        }
       });
 
     wpTablePagination.observeOnScope($scope)

@@ -26,35 +26,70 @@
 // See doc/COPYRIGHT.rdoc for more details.
 // ++
 
-import {TableStateStates, WorkPackageTableBaseService} from "./wp-table-base.service";
-import {QueryColumn, QueryResource} from "../../api/api-v3/hal-resources/query-resource.service";
-import {opServicesModule} from "../../../angular-modules";
-import {States} from "../../states.service";
-import {WorkPackageTableTimelineState} from "./../wp-table-timeline";
-import {ZoomLevel} from "../../wp-table/timeline/wp-timeline";
+import {opServicesModule} from '../../../angular-modules';
+import {States} from '../../states.service';
 import {WorkPackageTableRelationColumns} from '../wp-table-relation-columns';
+import {
+  WorkPackageResource,
+  WorkPackageResourceInterface
+} from '../../api/api-v3/hal-resources/work-package-resource.service';
+import {
+  RelationsStateValue,
+  WorkPackageRelationsService
+} from '../../wp-relations/wp-relations.service';
+import {WorkPackageTableColumnsService} from './wp-table-columns.service';
+import {TableStateStates, WorkPackageTableBaseService} from './wp-table-base.service';
+import {RelationResource} from '../../api/api-v3/hal-resources/relation-resource.service';
 import {queryColumnTypes} from '../../wp-query/query-column';
-import {WorkPackageResourceInterface} from '../../api/api-v3/hal-resources/work-package-resource.service';
-import {WorkPackageRelationsService} from '../../wp-relations/wp-relations.service';
+import {IQService} from 'angular';
 
-export class WorkPackageTableRelationColumnsService extends WorkPackageTableBaseService {
+  export class WorkPackageTableRelationColumnsService extends WorkPackageTableBaseService {
   protected stateName = 'relationColumns' as TableStateStates;
 
   constructor(public states:States,
+              public wpTableColumns:WorkPackageTableColumnsService,
+              public $q:IQService,
               public wpRelations:WorkPackageRelationsService) {
     super(states);
   }
 
-  public initialize(workPackages:WorkPackageResourceInterface[], columns:QueryColumn[]) {
+  public initialize(workPackages:WorkPackageResourceInterface[]) {
 
-    if (this.isRelationsRequired(columns)) {
-      this.wpRelations
-        .requireInvolved(workPackages.map(el => el.id))
+    if (this.wpTableColumns.hasRelationColumns()) {
+      this.requireInvolved(workPackages.map(el => el.id))
         .then(() => this.initializeState());
     } else {
       this.initializeState();
     }
+  }
 
+    /**
+     * Returns a subset of all relations that the user has currently expanded.
+     *
+     * @param workPackage
+     * @param relation
+     */
+  public relationsToExtendFor(workPackage:WorkPackageResource, relations:RelationsStateValue):RelationResource[] {
+      // Only if any relation columns or stored expansion state exist
+    if (!this.wpTableColumns.hasRelationColumns() || this.state.isPristine()) {
+      return [];
+    }
+
+    // Only if the work package has anything expanded
+    const expanded = this.current.getExpandFor(workPackage.id);
+    if (expanded === undefined) {
+      return [];
+    }
+
+    const column = this.wpTableColumns.findById(expanded)!;
+
+    if (column._type === queryColumnTypes.RELATION) {
+
+    }
+  }
+
+  public get current() {
+    return this.state.value! as WorkPackageTableRelationColumns;
   }
 
   private initializeState() {
@@ -62,14 +97,23 @@ export class WorkPackageTableRelationColumnsService extends WorkPackageTableBase
     this.state.putValue(current);
   }
 
-  private isRelationsRequired(columns:QueryColumn[]):boolean {
-    return !!_.find(columns, (c) => c._type === queryColumnTypes.RELATION);
+  /**
+   * Requires both the relation resource of the given work package ids as well
+   * as the `to` work packages returned from the relations
+   */
+  private requireInvolved(workPackageIds:string[]) {
+    const deferred = this.$q.defer();
+
+    this.wpRelations
+      .requireInvolved(workPackageIds)
+      .then((relations) => {
+
+      });
   }
 
-  private get current() {
-    return this.state.value as WorkPackageTableRelationColumns;
-  }
+  private requireRelationTargetsLoaded(workPackageIds:string[]) {
 
+  }
 }
 
 opServicesModule.service('wpTableRelationColumns', WorkPackageTableRelationColumnsService);
