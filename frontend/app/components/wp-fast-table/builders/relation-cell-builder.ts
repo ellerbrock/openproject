@@ -38,6 +38,7 @@ export class RelationCellbuilder {
     const state = this.wpRelations.relationState(workPackage.id).value;
     if (state) {
       counter.textContent = '' + _.size(state);
+      counter.classList.add('badge', '-secondary');
       td.appendChild(counter);
       td.appendChild(indicator);
     }
