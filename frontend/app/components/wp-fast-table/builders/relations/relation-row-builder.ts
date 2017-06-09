@@ -31,14 +31,16 @@ export class RelationRowBuilder extends SingleRowBuilder {
 
   constructor(protected workPackageTable:WorkPackageTable) {
     super(workPackageTable);
-    $injectFields(this, 'uiStateBuilder');
+
+    this.uiStateBuilder = new UiStateLinkBuilder();
   }
 
   /**
    * Build the columns on the given empty row
    */
-  public buildEmptyRelationRow(relation:RelationResource):[HTMLElement, boolean] {
-    const tr = this.createEmptyRelationRow(relation.from, relation.to);
+  public buildEmptyRelationRow(from:WorkPackageResourceInterface,  relation:RelationResource):[HTMLElement, boolean] {
+    const denormalized = relation.denormalized(from);
+    const tr = this.createEmptyRelationRow(from, denormalized);
     const columns = this.wpTableColumns.getColumns();
 
     // Set available information for ID and subject column
@@ -47,15 +49,15 @@ export class RelationRowBuilder extends SingleRowBuilder {
       const td = document.createElement('td');
 
       if (column.id === 'subject') {
-        const textNode = document.createTextNode(`(${relation.type}: ${relation.name}`);
+        const textNode = document.createTextNode(`(${denormalized.relationType}) ${denormalized.target.name}`);
         td.appendChild(textNode);
       }
 
       if (column.id === 'id') {
         const link = this.uiStateBuilder.linkToShow(
-          relation.to.id,
-          relation.to.name,
-          relation.to.id
+          denormalized.target.id,
+          denormalized.target.name,
+          denormalized.target.id
         );
 
         td.appendChild(link);
@@ -77,10 +79,10 @@ export class RelationRowBuilder extends SingleRowBuilder {
    * @param workPackage
    * @returns {any}
    */
-  public createEmptyRelationRow(from:WorkPackageResource, to:WorkPackageResource) {
+  public createEmptyRelationRow(from:WorkPackageResource, relation) {
     let tr = document.createElement('tr');
     tr.dataset['relatedworkPackageId'] = from.id;
-    tr.dataset['workPackageId'] = from.id;
+    tr.dataset['workPackageId'] = relation.target.id;
     tr.classList.add(
       rowClassName, commonRowClassName, 'issue',
       `wp-table--relations-aditional-row`, relationGroupClass(from.id)

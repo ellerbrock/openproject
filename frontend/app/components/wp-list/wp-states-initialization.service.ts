@@ -69,7 +69,7 @@ export class WorkPackageStatesInitializationService {
   }
 
   public updateFromResults(results:WorkPackageCollectionResource) {
-    this.wpTableRelationColumns.clear();
+    this.wpTableRelationColumns.clear("Clearing relations before updating");
 
     if (results.schemas) {
       _.each(results.schemas.elements, (schema:SchemaResource) => {

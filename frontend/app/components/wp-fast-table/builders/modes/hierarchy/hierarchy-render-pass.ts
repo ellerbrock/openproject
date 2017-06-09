@@ -30,7 +30,7 @@ export class HierarchyRenderPass extends PrimaryRenderPass {
 
   constructor(public workPackageTable:WorkPackageTable,
               public rowBuilder:SingleHierarchyRowBuilder) {
-    super(workPackageTable);
+    super(workPackageTable, rowBuilder);
 
     $injectFields(this, 'states');
   }

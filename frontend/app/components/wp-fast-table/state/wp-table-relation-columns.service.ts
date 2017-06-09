@@ -74,7 +74,7 @@ import {TypeRelationQueryColumn} from '../../api/api-v3/hal-resources/query-reso
      * @param workPackage
      * @param relation
      */
-  public relationsToExtendFor(workPackage:WorkPackageResource, relations:RelationsStateValue):RelationResource[] {
+  public relationsToExtendFor(workPackage:WorkPackageResourceInterface, relations:RelationsStateValue):RelationResource[] {
       // Only if any relation columns or stored expansion state exist
     if (!this.wpTableColumns.hasRelationColumns() || this.state.isPristine()) {
       return [];
@@ -90,10 +90,10 @@ import {TypeRelationQueryColumn} from '../../api/api-v3/hal-resources/query-reso
 
     // Get the type of TO work package
     if (column._type === queryColumnTypes.RELATION) {
-      const typeHref = (column as TypeRelationQueryColumn)._links!.type.href;
+      const typeHref = (column as TypeRelationQueryColumn).type.href;
 
       return _.filter(relations, (relation:RelationResource) => {
-        return relation.workPackageTypes.to === typeHref;
+        return relation.denormalized(workPackage).workPackageType === typeHref;
       });
     }
 
@@ -107,6 +107,7 @@ import {TypeRelationQueryColumn} from '../../api/api-v3/hal-resources/query-reso
 
   private initializeState() {
     let current = new WorkPackageTableRelationColumns();
+
     this.state.putValue(current);
   }
 

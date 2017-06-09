@@ -38,20 +38,24 @@ export class RelationsRenderPass implements SecondaryRenderPass {
       // If the work package has no relations, ignore
       const fromId = row.belongsTo.id;
       const state = this.wpRelations.relationState(fromId);
-      if (!state.hasValue() || _.size(state.value)) {
+      if (!state.hasValue() || _.size(state.value!) === 0) {
         return;
       }
 
       _.each(this.wpTableRelationColumns.relationsToExtendFor(row.belongsTo, state.value!), (relation) => {
 
         // Build each relation row (currently sorted by order defined in API)
-        const [relationRow,] = this.relationRowBuilder.buildEmptyRelationRow(relation);
+        const [relationRow,] = this.relationRowBuilder.buildEmptyRelationRow(row.belongsTo, relation);
 
         // Augment any data for the belonging work package row to it
         this.tablePass.augmentSecondaryElement(relationRow, row);
 
         // Insert next to the work package row
-        const target = jQuery(this.tablePass.tableBody).find(`${rowId(fromId)},${relationGroupClass(fromId)}`).last();
+        // If no relations exist until here, directly under the row
+        // otherwise as the last element of the relations
+        const target = jQuery(this.tablePass.tableBody)
+          .find(`#${rowId(fromId)},.${relationGroupClass(fromId)}`)
+          .last();
         target.after(relationRow);
 
         // Splice the renderedRow with that data
@@ -62,9 +66,6 @@ export class RelationsRenderPass implements SecondaryRenderPass {
         });
       });
     });
-  }
-
-  private buildRelationRowsFor(row:RenderedRow, relation:RelationResource) {
   }
 
   private get isApplicable() {

@@ -77,9 +77,6 @@ export class ApiWorkPackagesService {
       },
       {
         caching: { enabled: false }
-      })
-      .then((collection:WorkPackageCollectionResourceInterface) => {
-        return collection.elements;
       });
   }
 

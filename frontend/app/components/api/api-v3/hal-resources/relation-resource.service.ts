@@ -27,7 +27,7 @@ import {opApiModule} from "../../../../angular-modules";
 // See doc/COPYRIGHT.rdoc for more details.
 //++
 import {HalResource} from "./hal-resource.service";
-import {WorkPackageResource} from "./work-package-resource.service";
+import {WorkPackageResource, WorkPackageResourceInterface} from "./work-package-resource.service";
 
 interface RelationResourceLinks {
   delete(): ng.IPromise<any>;
@@ -72,12 +72,24 @@ export class RelationResource extends HalResource {
   public to:WorkPackageResource;
   public from:WorkPackageResource;
 
-  public normalizedType(workPackage:WorkPackageResource) {
-    if (this.to.href === workPackage.href) {
-      return this.reverseType;
-    }
+  public normalizedType(workPackage:WorkPackageResourceInterface) {
+    return this.denormalized(workPackage).relationType;
+  }
 
-    return this.type;
+  /**
+   * Return the denormalized relation data, seeing the relation.from to be `workPackage`.
+   *
+   * @param workPackage
+   * @return {{id, href, relationType: string, workPackageType}}
+   */
+  public denormalized(workPackage:WorkPackageResourceInterface) {
+    const target = (this.to.href === workPackage.href) ? 'from' : 'to'
+
+    return {
+      target: this[target],
+      relationType: target === 'from' ? this.reverseType : this.type,
+      workPackageType: this[target + 'Type'].href
+    };
   }
 
   /**
@@ -88,16 +100,6 @@ export class RelationResource extends HalResource {
       from: WorkPackageResource.idFromLink(this.from.href!),
       to: WorkPackageResource.idFromLink(this.to.href!)
     };
-  }
-
-  /**
-   * Get the involved types, returning an href to the respective types
-   */
-  public get workPackageTypes() {
-    return {
-      from: this.$links.fromType.href,
-      to: this.$links.toType.href,
-    }
   }
 
   public updateDescription(description:string) {

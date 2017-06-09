@@ -35,7 +35,9 @@ export interface RelationColumnStateValue {
 export class WorkPackageTableRelationColumns extends WorkPackageTableBaseState<RelationColumnStateValue> {
   constructor() {
     super();
-    this.current = {};
+    this.current = {
+      2: 'relationsToType1'
+    };
   }
 
   public getExpandFor(workPackageId:string) {

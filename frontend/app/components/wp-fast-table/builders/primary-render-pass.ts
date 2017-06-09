@@ -5,6 +5,7 @@ import {$injectFields} from '../../angular/angular-injector-bridge.functions';
 import {rowClass} from '../helpers/wp-table-row-helpers';
 import {TimelineRenderPass} from './timeline/timeline-render-pass';
 import {SingleRowBuilder} from './rows/single-row-builder';
+import {RelationsRenderPass} from './relations/relations-render-pass';
 
 export interface RenderedRow {
   isWorkPackage:boolean;
@@ -17,7 +18,7 @@ export interface TableRenderResult {
 }
 
 export interface SecondaryRenderPass {
-  render(table:WorkPackageTable, renderPass:PrimaryRenderPass):void;
+  render():void;
 }
 
 export abstract class PrimaryRenderPass {
@@ -50,7 +51,7 @@ export abstract class PrimaryRenderPass {
 
     // Render subsequent passes
     // that may modify the structure of the table
-    // this.relations.render(this.workPackageTable, this);
+    this.relations.render();
 
     // Synchronize the rows to timeline
     this.timeline.render();
@@ -80,6 +81,7 @@ export abstract class PrimaryRenderPass {
 
   protected prepare() {
     this.timeline = new TimelineRenderPass(this.workPackageTable, this);
+    this.relations = new RelationsRenderPass(this.workPackageTable, this);
     this.tableBody = document.createDocumentFragment();
     this.renderedOrder = [];
   }
