@@ -30,7 +30,6 @@ import {QueryFilterResource} from '../api/api-v3/hal-resources/query-filter-reso
 import {QueryFilterInstanceResource} from '../api/api-v3/hal-resources/query-filter-instance-resource.service';
 import {QuerySchemaResourceInterface} from '../api/api-v3/hal-resources/query-schema-resource.service';
 import {QueryFilterInstanceSchemaResource} from '../api/api-v3/hal-resources/query-filter-instance-schema-resource.service';
-import {WorkPackageTableBaseState, WorkPackageTableQueryState} from './wp-table-base';
 import {WorkPackageTableBaseState} from './wp-table-base';
 
 export class WorkPackageTableFilters extends WorkPackageTableBaseState<QueryFilterInstanceResource[]> {

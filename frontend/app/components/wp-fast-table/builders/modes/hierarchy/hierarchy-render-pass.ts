@@ -183,7 +183,6 @@ export class HierarchyRenderPass extends PrimaryRenderPass {
     this.renderedOrder.push({
       isWorkPackage: !isAncestor,
       belongsTo: workPackage,
-      classIdentifier: rowClass(workPackage.id),
       hidden: hidden
     });
   }
@@ -234,7 +233,6 @@ export class HierarchyRenderPass extends PrimaryRenderPass {
     this.renderedOrder.splice(index + 1, 0, {
       isWorkPackage: !isAncestor,
       belongsTo: workPackage,
-      classIdentifier: rowClass(workPackage.id),
       hidden: hidden,
     });
     this.rendered[workPackage.id] = true;

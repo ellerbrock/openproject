@@ -32,6 +32,8 @@ import {WorkPackageResource} from "./work-package-resource.service";
 interface RelationResourceLinks {
   delete(): ng.IPromise<any>;
   updateImmediately(payload: any): ng.IPromise<any>;
+  toType:{ href:string };
+  fromType:{ href:string };
 }
 
 export class RelationResource extends HalResource {
@@ -78,7 +80,6 @@ export class RelationResource extends HalResource {
     return this.type;
   }
 
-
   /**
    * Get the involved IDs, returning an object to the ids.
    */
@@ -87,6 +88,16 @@ export class RelationResource extends HalResource {
       from: WorkPackageResource.idFromLink(this.from.href!),
       to: WorkPackageResource.idFromLink(this.to.href!)
     };
+  }
+
+  /**
+   * Get the involved types, returning an href to the respective types
+   */
+  public get workPackageTypes() {
+    return {
+      from: this.$links.fromType.href,
+      to: this.$links.toType.href,
+    }
   }
 
   public updateDescription(description:string) {

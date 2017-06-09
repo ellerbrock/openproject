@@ -6,7 +6,7 @@ export class PlainRenderPass extends PrimaryRenderPass {
 
   constructor(public workPackageTable:WorkPackageTable,
               public rowBuilder:SingleRowBuilder) {
-    super(workPackageTable);
+    super(workPackageTable, rowBuilder);
   }
 
   /**

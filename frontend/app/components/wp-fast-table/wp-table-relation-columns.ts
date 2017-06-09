@@ -38,6 +38,10 @@ export class WorkPackageTableRelationColumns extends WorkPackageTableBaseState<R
     this.current = {};
   }
 
+  public getExpandFor(workPackageId:string) {
+    return this.current[workPackageId];
+  }
+
   public expandFor(workPackageId:string, columnId:string) {
     this.current[workPackageId] = columnId;
   }

@@ -109,6 +109,14 @@ export class WorkPackageTableColumnsService extends WorkPackageTableBaseService 
   }
 
   /**
+   * Return the column object for the given id.
+   * @param id
+   */
+  public findById(id:string):QueryColumn|undefined {
+    return _.find(this.getColumns(), column => column.id === id);
+  }
+
+  /**
    * Return the previous column of the given column name
    * @param name
    */

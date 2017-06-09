@@ -42,6 +42,9 @@ import {TableStateStates, WorkPackageTableBaseService} from './wp-table-base.ser
 import {RelationResource} from '../../api/api-v3/hal-resources/relation-resource.service';
 import {queryColumnTypes} from '../../wp-query/query-column';
 import {IQService} from 'angular';
+import {HalRequestService} from '../../api/api-v3/hal-request/hal-request.service';
+import {WorkPackageCacheService} from '../../work-packages/work-package-cache.service';
+import {TypeRelationQueryColumn} from '../../api/api-v3/hal-resources/query-resource.service';
 
   export class WorkPackageTableRelationColumnsService extends WorkPackageTableBaseService {
   protected stateName = 'relationColumns' as TableStateStates;
@@ -49,6 +52,8 @@ import {IQService} from 'angular';
   constructor(public states:States,
               public wpTableColumns:WorkPackageTableColumnsService,
               public $q:IQService,
+              public halRequest:HalRequestService,
+              public wpCacheService:WorkPackageCacheService,
               public wpRelations:WorkPackageRelationsService) {
     super(states);
   }
@@ -83,9 +88,17 @@ import {IQService} from 'angular';
 
     const column = this.wpTableColumns.findById(expanded)!;
 
+    // Get the type of TO work package
     if (column._type === queryColumnTypes.RELATION) {
+      const typeHref = (column as TypeRelationQueryColumn)._links!.type.href;
 
+      return _.filter(relations, (relation:RelationResource) => {
+        return relation.workPackageTypes.to === typeHref;
+      });
     }
+
+    // TODO fill after relations by relation type
+    return [];
   }
 
   public get current() {
@@ -102,17 +115,14 @@ import {IQService} from 'angular';
    * as the `to` work packages returned from the relations
    */
   private requireInvolved(workPackageIds:string[]) {
-    const deferred = this.$q.defer();
-
-    this.wpRelations
+    return this.wpRelations
       .requireInvolved(workPackageIds)
       .then((relations) => {
-
+        const involvedIDs = relations.map(relation => [relation.ids.from, relation.ids.to]);
+        return this.wpCacheService.loadWorkPackages(
+          _.uniq(_.flatten(involvedIDs))
+        );
       });
-  }
-
-  private requireRelationTargetsLoaded(workPackageIds:string[]) {
-
   }
 }
 

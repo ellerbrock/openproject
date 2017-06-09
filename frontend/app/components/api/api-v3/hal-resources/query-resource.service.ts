@@ -88,4 +88,11 @@ export interface QueryColumn extends HalResource {
   }
 }
 
+export interface TypeRelationQueryColumn extends QueryColumn {
+  _links?: {
+    self: { href:string, title:string },
+    type: { href:string }
+  }
+}
+
 opApiModule.factory('QueryResource', queryResource);

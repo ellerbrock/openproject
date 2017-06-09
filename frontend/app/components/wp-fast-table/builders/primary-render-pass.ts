@@ -4,11 +4,11 @@ import {WorkPackageResourceInterface} from '../../api/api-v3/hal-resources/work-
 import {$injectFields} from '../../angular/angular-injector-bridge.functions';
 import {rowClass} from '../helpers/wp-table-row-helpers';
 import {TimelineRenderPass} from './timeline/timeline-render-pass';
+import {SingleRowBuilder} from './rows/single-row-builder';
 
 export interface RenderedRow {
   isWorkPackage:boolean;
   belongsTo?:WorkPackageResourceInterface;
-  classIdentifier:string;
   hidden:boolean;
 }
 
@@ -36,7 +36,7 @@ export abstract class PrimaryRenderPass {
   /** Additional render pass that handles table relation rendering */
   public relations:SecondaryRenderPass;
 
-  constructor(public workPackageTable:WorkPackageTable) {
+  constructor(public workPackageTable:WorkPackageTable, public rowBuilder:SingleRowBuilder) {
     $injectFields(this, 'states', 'I18n');
 
   }
@@ -53,7 +53,7 @@ export abstract class PrimaryRenderPass {
     // this.relations.render(this.workPackageTable, this);
 
     // Synchronize the rows to timeline
-    this.timeline.render(this.workPackageTable, this);
+    this.timeline.render();
 
     return this;
   }
@@ -79,7 +79,7 @@ export abstract class PrimaryRenderPass {
   }
 
   protected prepare() {
-    this.timeline = new TimelineRenderPass();
+    this.timeline = new TimelineRenderPass(this.workPackageTable, this);
     this.tableBody = document.createDocumentFragment();
     this.renderedOrder = [];
   }
@@ -105,7 +105,6 @@ export abstract class PrimaryRenderPass {
     this.renderedOrder.push({
       isWorkPackage: true,
       belongsTo: workPackage,
-      classIdentifier: rowClass(workPackage.id),
       hidden: hidden
     });
   }
@@ -122,7 +121,6 @@ export abstract class PrimaryRenderPass {
 
     this.renderedOrder.push({
       isWorkPackage: false,
-      classIdentifier: classIdentifer,
       hidden: hidden
     });
   }
