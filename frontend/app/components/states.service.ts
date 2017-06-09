@@ -21,7 +21,7 @@ import {WPTableRowSelectionState} from "./wp-fast-table/wp-table.interfaces";
 import {whenDebugging} from "../helpers/debug_output";
 import {WorkPackageTableHierarchies} from "./wp-fast-table/wp-table-hierarchies";
 import {WorkPackageTableTimelineState} from "./wp-fast-table/wp-table-timeline";
-import {TableRenderResult} from "./wp-fast-table/builders/modes/table-render-pass";
+import {TableRenderResult} from "./wp-fast-table/builders/primary-render-pass";
 import {SwitchState} from "./states/switch-state";
 import {WorkPackageTableRelationColumns} from './wp-fast-table/wp-table-relation-columns';
 

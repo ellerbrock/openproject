@@ -1,13 +1,13 @@
-import {States} from '../../../states.service';
-import {WorkPackageTable} from '../../wp-fast-table';
-import {WorkPackageResourceInterface} from '../../../api/api-v3/hal-resources/work-package-resource.service';
-import {TimelineRowBuilder} from '../timeline/timeline-row-builder';
-import {$injectFields} from '../../../angular/angular-injector-bridge.functions';
-import {Subject} from 'rxjs';
-import {rowClass} from '../../helpers/wp-table-row-helpers';
+import {States} from '../../states.service';
+import {WorkPackageTable} from '../wp-fast-table';
+import {WorkPackageResourceInterface} from '../../api/api-v3/hal-resources/work-package-resource.service';
+import {$injectFields} from '../../angular/angular-injector-bridge.functions';
+import {rowClass} from '../helpers/wp-table-row-helpers';
+import {TimelineRenderPass} from './timeline/timeline-render-pass';
 
 export interface RenderedRow {
-  workPackageId:string|null;
+  isWorkPackage:boolean;
+  belongsTo?:WorkPackageResourceInterface;
   classIdentifier:string;
   hidden:boolean;
 }
@@ -16,12 +16,13 @@ export interface TableRenderResult {
   renderedOrder:RenderedRow[];
 }
 
-export abstract class TableRenderPass {
+export interface SecondaryRenderPass {
+  render(table:WorkPackageTable, renderPass:PrimaryRenderPass):void;
+}
+
+export abstract class PrimaryRenderPass {
   public states:States;
   public I18n:op.I18n;
-
-  /** Row builders */
-  protected timelineBuilder:TimelineRowBuilder;
 
   /** The rendered order of rows of work package IDs or <null>, if not a work package row */
   public renderedOrder:RenderedRow[];
@@ -29,20 +30,46 @@ export abstract class TableRenderPass {
   /** Resulting table body */
   public tableBody:DocumentFragment;
 
-  /** Resulting timeline body */
-  public timelineBody:DocumentFragment;
+  /** Additional render pass that handles timeline rendering */
+  public timeline:TimelineRenderPass;
+
+  /** Additional render pass that handles table relation rendering */
+  public relations:SecondaryRenderPass;
 
   constructor(public workPackageTable:WorkPackageTable) {
     $injectFields(this, 'states', 'I18n');
+
   }
 
   public render():this {
     // Prepare and reset the render pass
     this.prepare();
-    // Render into the fragments
+
+    // Render into the table fragment
     this.doRender();
 
+    // Render subsequent passes
+    // that may modify the structure of the table
+    // this.relations.render(this.workPackageTable, this);
+
+    // Synchronize the rows to timeline
+    this.timeline.render(this.workPackageTable, this);
+
     return this;
+  }
+
+  /**
+   * Augment a new row added by a secondary render pass with whatever information is needed
+   * by the current render mode.
+   *
+   * e.g., add a class name to demark which group this element belongs to.
+   *
+   * @param row The HTMLElement to be inserted by the secondary render pass.
+   * @param belongsTo The RenderedRow the element will be inserted for.
+   * @return {HTMLElement} The augmented row element.
+   */
+  public augmentSecondaryElement(row:HTMLElement, belongsTo:RenderedRow):HTMLElement {
+    return row;
   }
 
   public get result():TableRenderResult {
@@ -52,9 +79,8 @@ export abstract class TableRenderPass {
   }
 
   protected prepare() {
+    this.timeline = new TimelineRenderPass();
     this.tableBody = document.createDocumentFragment();
-    this.timelineBody = document.createDocumentFragment();
-    this.timelineBuilder = new TimelineRowBuilder(this.workPackageTable);
     this.renderedOrder = [];
   }
 
@@ -72,14 +98,13 @@ export abstract class TableRenderPass {
    */
   protected appendRow(workPackage:WorkPackageResourceInterface,
                       row:HTMLElement,
-                      rowClasses:string[] = [],
                       hidden:boolean = false) {
 
     this.tableBody.appendChild(row);
-    this.timelineBuilder.insert(workPackage, this.timelineBody, rowClasses);
 
     this.renderedOrder.push({
-      workPackageId: workPackage.id.toString(),
+      isWorkPackage: true,
+      belongsTo: workPackage,
       classIdentifier: rowClass(workPackage.id),
       hidden: hidden
     });
@@ -89,16 +114,14 @@ export abstract class TableRenderPass {
    * Append a non-work package row to both containers
    * @param row HTMLElement to append
    * @param classIdentifer a unique identifier for the two rows (one each in table/timeline).
-   * @param additionalClasses Additional classes to apply to the timeline row for mirroring purposes
    * @param hidden whether the row was rendered hidden
    */
-  protected appendNonWorkPackageRow(row:HTMLElement, classIdentifer:string, additionalClasses:string[] = [], hidden:boolean = false) {
+  protected appendNonWorkPackageRow(row:HTMLElement, classIdentifer:string, hidden:boolean = false) {
     row.classList.add(classIdentifer);
     this.tableBody.appendChild(row);
-    this.timelineBuilder.insert(null, this.timelineBody, additionalClasses.concat([classIdentifer]));
 
     this.renderedOrder.push({
-      workPackageId: null,
+      isWorkPackage: false,
       classIdentifier: classIdentifer,
       hidden: hidden
     });
